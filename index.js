@@ -11,9 +11,84 @@ class MinHeap{
         return (this.size()===0);
     }
 
-    top(){
+   top(){
         return this.heap_array[0];
     }
+
+    push(value){
+        this.heap_array.push(value);
+        this.up_heapify();
+    }
+
+    pop()
+    {
+        if(this.empty()==false)
+        {
+            var last_index=this.size()-1;
+            this.heap_array[0]={...this.heap_array[last_index]}; //... is spread syntax
+            this.heap_array.pop();
+            this.down_heapify();
+        }
+    }
+	
+   //down heapify will be used for deleting a node and again making our heap a min heap
+    down_heapify(){
+        var currIndex=0;
+        while(currIndex<this.size())
+        {
+            var currEle=this.heap_array[currIndex];
+            var childInd1=(currIndex*2)+1;
+            var childInd2=(currIndex*2)+2;
+            var childEle1=this.heap_array[childInd1];
+            var childEle2=this.heap_array[childInd2];
+            var smallest=currIndex;
+
+            if(childInd1<this.size() && this.heap_array[childInd1][0]< this.heap_array[smallest][0])
+            {
+                smallest=childInd1;
+            }
+
+            if(childInd2<this.size() && this.heap_array[childInd2][0]< this.heap_array[smallest][0])
+            {
+                smallest=childInd2;
+            }
+
+            if(smallest==childInd1){
+                this.heap_array[childInd1]=currEle;
+                this.heap_array[currIndex]=childEle1;
+                currIndex=childInd1;
+            }
+            else if(smallest==childInd2){
+                this.heap_array[childInd2]=currEle;
+                this.heap_array[currIndex]=childEle2;
+                currIndex=childInd2;
+            }
+            else
+             break;
+        }
+    }
+
+    //up heapify is done to add elements in the heap and maintaining the property of the heap
+    up_heapify(){
+        var currIndex=this.size()-1;
+        while(currIndex>0){
+            var currEle=this.heap_array[currIndex];
+            var parentInd=Math.trunc((currIndex-1)/2);
+            var parentEle=this.heap_array[parentInd];
+
+            if(parentEle[0]<currEle[0])
+            {
+                break;
+            }
+            else
+            {
+                this.heap_array[parentInd]=currEle;
+                this.heap_array[currIndex]=parentEle;
+                currIndex=parentInd;
+            }
+        }
+    }
+
 
 
 }
@@ -44,6 +119,54 @@ class Codec{
             let output_message = "Compression complete and file sent for download. " + '\n' + "Compression Ratio : " + (data.length / final_string.length).toPrecision(6);
             return [final_string, output_message];
         }
+	    
+	//if input file has only one character
+        if(mp.size===1)
+        {
+            let key, value;
+            for(let [k,v] of mp)
+            {
+                key=k;
+                value=v;
+            }
+
+            let final_string="one"+'#'+key+'#'+value.toString();
+            let output_message = "Compression complete and file sent for download. " + '\n' + "Compression Ratio : " + (data.length / final_string.length).toPrecision(6);
+            return [final_string, output_message];
+        }
+
+        //if input file has more than 1 character
+        //pushing all characters and their frequency in heap
+        for(let [k,v] of mp)
+        {
+            this.heap.push([v,k]);
+        }
+
+        //making huffman tree
+        while(this.heap.size()>=2)
+        {
+            let tempNode1=this.heap.top(); 
+            this.heap.pop();
+            let tempNode2=this.heap.top();
+            this.heap.pop();
+            //console.log(tempNode1);
+            //console.log(tempNode2);
+            let newNode=[(tempNode1[0]+tempNode2[0]),[tempNode1,tempNode2]];
+            this.heap.push(newNode);
+        }
+
+        var huffmanTree=this.heap.top();
+        this.heap.pop();
+        this.codes={}; //creating an empty object
+        this.getCodes(huffmanTree,"");
+
+        //encoding the data
+        let binaryString="";
+        for(let i=0;i<data.length;i++)
+        {
+            binaryString+=this.codes[data[i]];
+        }
+
 
     }
 
