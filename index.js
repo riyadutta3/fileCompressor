@@ -94,6 +94,45 @@ class MinHeap{
 }
 //Coder Decoder class
 class Codec{
+	
+    // Converting Huffman tree into a string
+    make_string(node){
+        if(typeof(node[1])==="string"){
+            return "'"+node[1];
+        }
+        return '0'+this.make_string(node[1][0])+'1'+this.make_string(node[1][1]);
+    }
+
+    // Converting Huffman string into a tree
+    make_tree(tree_string){
+        //this.index=index;
+        let node=[];
+        if (tree_string[this.index] === "'") {
+			this.index++;
+			node.push(tree_string[this.index]);
+			this.index++;
+			return node;
+		}
+        this.index++;
+        node.push(this.make_tree(tree_string));//Pushing left child
+        this.index++;
+        node.push(this.make_tree(tree_string));//Pushing Right child
+        return node;
+    }
+
+    //getting codes of all the characters
+    getCodes(node,curr_code){
+        //if leaf node is found
+        if(typeof(node[1])==="string"){ //beacuse only leaf node has character, all others will have array of the two nodes combined
+            this.codes[node[1]]=curr_code;
+            return;
+        }
+
+        //else explore left and right child
+
+        this.getCodes(node[1][0],curr_code+'0'); //left child                              
+        this.getCodes(node[1][1],curr_code+'1'); //right child
+    }
 
     encode(data)
     {
@@ -166,7 +205,46 @@ class Codec{
         {
             binaryString+=this.codes[data[i]];
         }
+	console.log(binaryString);
+        //console.log(this.codes);
 
+        //using 8 bits to represent every character
+        let padding_length=(8-(binaryString.length%8))%8;
+        //console.log(padding_length);
+        for(let i=0;i<padding_length;i++)
+        {
+            binaryString+='0';
+        }
+        //console.log(binaryString);
+
+        //Converting each 8 bits to corresponding character
+        let encoded_data="";
+        for(let i=0;i<binaryString.length;){
+            let curr_num=0;
+            for(let j=0;j<8;j++,i++){
+                curr_num*=2;
+                curr_num+=(binaryString[i]-'0');
+                //converting 8 bit string to decimal
+            }
+            //converting decimal to UTF-8
+            encoded_data+=String.fromCharCode(curr_num);
+            //console.log(encoded_data);
+        }
+
+        //tree_string contains representation of tree in string manner
+        let tree_string=this.make_string(huffmanTree);
+        //console.log(tree_string);
+        let ts_length=tree_string.length;
+	
+        //Final Compressed String contains:-
+        //1.tree_string length
+        //2.Padding length
+        //3.tree_string
+        //4.encoded_string
+        let final_string=ts_length.toString()+'#'+padding_length.toString()+'#'+tree_string+encoded_data;
+        let output_message="Compression complete and file sent for download. " + '\n' + "Compression Ratio : " + (data.length / final_string.length).toPrecision(6);
+        return [final_string, output_message];
+        
 
     }
 
@@ -186,11 +264,113 @@ class Codec{
 			return;
         }
 
+        //empty file
         if(temp==="zero"){
             let decoded_data="";
             let output_message="Decompression complete and file sent for download.";
             return [decoded_data, output_message];
         }
+
+        //only one character in file
+        if(temp==="one")
+        {
+            data=data.slice(k+1);
+            k=0;
+            temp="";
+            while(data[k]!='#')
+            {
+                temp+=data[k];
+                k++;
+            }
+            let one_char=temp;
+
+            //Extracting the count of that character
+            data=data.slice(k+1);
+            let strLen=parseInt(data);
+
+            //Making data
+            let decodedData="";
+            for(let i=0;i<strLen;i++)
+            {
+                decodedData+=one_char;
+            }
+            let output_message="Decompression complete and file sent for download.";
+            return [decodedData,output_message];
+        }
+
+        //if there are more than 1 characters
+        //in case of multi-character first thing will be tree string length, so that will be stored in our temp
+        let ts_length=parseInt(temp);
+        //console.log(ts_length);
+
+        //padding length
+        data=data.slice(k+1);
+        k=0;
+        temp="";
+        while(data[k]!='#')
+        {
+            temp+=data[k];
+            k++;
+        }
+        let padding_length=parseInt(temp);
+
+
+        //getting tree string
+        data=data.slice(k+1);
+        temp="";
+        for(k=0;k<ts_length;k++)
+        {
+            temp+=data[k];
+        }
+        let tree_string=temp;
+        //console.log(tree_string);
+
+        //getting encoded data
+        data=data.slice(k);
+        temp = "";
+		for (k = 0; k < data.length; k++) {
+            temp += data[k];
+		}
+		let encoded_data = temp;
+
+        //making huffman tree from string
+        this.index=0;
+        var huffmanTree=this.make_tree(tree_string);
+
+        //Retrieving binary_string from encoded_data
+        let binary_string="";
+        for(let i=0;i<encoded_data.length;i++){
+            let curr_num=encoded_data.charCodeAt(i);
+            let curr_binary="";
+            for (let j = 7; j >= 0; j--) {
+				let foo = curr_num >> j;
+				curr_binary = curr_binary + (foo & 1);
+			}
+            binary_string+=curr_binary;
+        }
+
+        //removing the padded 0's
+        binary_string=binary_string.slice(0, binary_string.length-padding_length);
+
+        //final decoding using binary_string and huffman tree
+        let decodedData="";
+        let node=huffmanTree;
+        for(let i=0;i<binary_string.length;i++)
+        {
+            if(binary_string[i]==='0')
+            node=node[0]; //left child
+            else
+            node=node[1]; //right child
+
+            if(typeof(node[0]) === "string")
+            {
+                decodedData+=node[0];
+                node=huffmanTree;
+            }
+        }
+
+        let output_message = "Decompression complete and file sent for download.";
+		return [decodedData, output_message];
 
     }
 
