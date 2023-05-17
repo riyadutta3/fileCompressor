@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Acme&family=Raleway:wght@300&family=Wix+Madefor+Display:wght@400;500&display=swap');
 *{
     /* background-color:  rgba(243, 239, 239, 0.787); */
-    color: #E7CBCB;
+    color: rgb(90, 85, 85);
     margin: 0;
     padding: 0;
     text-align: justify;
@@ -26,6 +26,7 @@ body{
 .h2{
     margin: 10px;
     size: 20px;
+    color: #E7CBCB;
 }
 
 #heading {
