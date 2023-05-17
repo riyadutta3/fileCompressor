@@ -9,14 +9,15 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1 id="heading">File Compressor</h1>
-    <div class="bigdiv">
+    <div class="div1" ><h1 id="heading">File Compressor</h1></div>
+    <h3 class="h2">Here you can compress your files in just three steps!</h3>
+    <div class="center">
 
         <!-- Uploading file -->
         <div class="box">
-            <h2>STEP 1: UPLOAD YOUR FILE</h2>
+            <h2 class="h">STEP 1: UPLOAD YOUR FILE</h2>
             <div id="step1">
-                <form class="form" id="fileForm">
+                <form action="action.html"class="form" id="fileForm">
                     <input type="file" id="uploadFile" class="input button item">
                     <input type="submit" value="Submit" class="input button item" id="submitBtn">
                 </form>
@@ -24,9 +25,8 @@
             </div>
         </div>
 
-        <!-- Selecting Action -->
         <div class="box">
-            <h2>STEP 2: SELECT&nbspACTION</h2>
+            <h2 class="h">STEP 2: SELECT&nbspACTION</h2>
             <div id="step2">
                 <button type="button" id="encode" class="button item">COMPRESS</button>
                 <button type="button" id="decode" class="button item">DE-COMPRESS</button>
@@ -35,7 +35,7 @@
 
         <!-- Wait a moment -->
         <div class="box">
-            <h2>STEP 3: SIT BACK AND RELAX</h2>
+            <h2 class="h">STEP 3: SIT BACK AND RELAX</h2>
             <div id="step3">
             </div>
             <button type="button" onclick="location.reload()" class="button item">Click Here</button> to Start Again!
@@ -44,6 +44,6 @@
         
 
     </div>
-    <script src="main.js"></script>
+    <script src="index.js"></script>
 </body>
 </html>
